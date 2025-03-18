@@ -36,7 +36,7 @@ export const getOrderswithpageination = async (req, res) => {
             ]
         } : {};
 
-        const orders = await Order.find(searchQuery).skip(skip).limit(limit).populate('customerId', 'email mobile');
+        const orders = await Order.find(searchQuery).skip(skip).limit(limit).populate('customerId', 'email mobile firstName lastName ');
         const totalOrders = await Order.countDocuments(searchQuery);
         res.status(200).json({
             success: true,
@@ -58,7 +58,7 @@ export const getOrderswithpageination = async (req, res) => {
 
 export const getOrderDetailsById = async (req, res) => {
     try {
-        const order = await Order.findById(req.params.id).populate('customerId', 'email mobile'); // populate the customer data (you can specify the fields you want)
+        const order = await Order.findById(req.params.id).populate('customerId', 'email mobile firstName lastName ');// populate the customer data (you can specify the fields you want)
 
 
         if (!order) {
