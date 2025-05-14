@@ -1,10 +1,11 @@
 import express from 'express';
-import { getAllUsers, getUsersWithPagination, getUserById, deleteUser, updateUserProfile, getUserProfile } from '../../controllers/admin/userController.js';
+import { getAllUsers, getUserCount, getUsersWithPagination, getUserById, deleteUser, updateUserProfile, getUserProfile } from '../../controllers/admin/userController.js';
 import { authenticateToken } from '../../middleware/authMiddleware.js';
 const router = express.Router();
 
 // Route to get all users
 router.get('/', getAllUsers);
+router.get('/getCount', getUserCount);
 
 // Route to get users with pagination
 router.get('/paginated', getUsersWithPagination);

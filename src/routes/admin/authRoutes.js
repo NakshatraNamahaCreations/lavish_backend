@@ -1,11 +1,12 @@
 import express from 'express';
-import { register, login , logout} from '../../controllers/admin/authController.js';
+import { register, login, logout, getAllteamsMember } from '../../controllers/admin/authController.js';
 import { adminauthenticateToken } from '../../middleware/admin/authMiddleware.js';  // If needed for protected routes
-
+import upload from "../../middleware/multer/multer.js"
 const router = express.Router();
 
-router.post('/register', register);
-router.post('/login', login);  
-router.post('/logout', adminauthenticateToken,  logout);  
+router.post("/register", upload.single("profileImage"), register);
+router.post('/login', login);
+router.post('/logout', adminauthenticateToken, logout);
+router.get('/teamMembers', getAllteamsMember);
 
 export default router;

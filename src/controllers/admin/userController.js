@@ -4,19 +4,39 @@ import User from '../../models/User.js';
 export const getAllUsers = async (req, res) => {
     try {
         const users = await User.find();
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             totalcount: users.length,
             users: users
         });
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: "Error fetching users",
             error: error.message
         });
     }
 };
+
+
+//get User Count
+export const getUserCount = async (req, res) => {
+    try {
+        const totalCount = await User.countDocuments();
+        console.log("Total number of documents:", totalCount);
+        return res.status(200).json({
+            success: true,
+            count: totalCount
+        })
+    } catch (error) {
+        console.log("Error", error)
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch User Count",
+            error: error.message,
+        });
+    }
+}
 
 
 // Route to get users with pagination
@@ -45,7 +65,7 @@ export const getUsersWithPagination = async (req, res) => {
         const totalUsers = await User.countDocuments(searchQuery);
 
         // Send the response with users and pagination data
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             data: {
                 users,
@@ -60,7 +80,7 @@ export const getUsersWithPagination = async (req, res) => {
         });
     } catch (error) {
         // Handle error
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: "Error fetching users",
             error: error.message
@@ -80,13 +100,13 @@ export const getUserById = async (req, res) => {
             });
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             data: user
         });
     } catch (error) {
         console.error("Error in getUserById:", error);
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: "Error fetching user",
             error: error.message
@@ -103,12 +123,12 @@ export const deleteUser = async (req, res) => {
                 message: "User not found"
             });
         }
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             message: "User deleted successfully"
         });
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: "Error deleting user",
             error: error.message
@@ -150,14 +170,14 @@ export const updateUserProfile = async (req, res) => {
             });
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             message: "User updated successfully",
             user: user
         });
     } catch (error) {
         console.error("Error:", error);
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: "Error updating user profile.",
             error: error.message
@@ -183,13 +203,13 @@ export const getUserProfile = async (req, res) => {
                 message: "User not found."
             });
         }
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             user: user
         });
 
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: "Error fetching user profile",
             error: error.message
