@@ -4,7 +4,7 @@ const itemSchema = new mongoose.Schema({
   refId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    refPath: 'categoryType'  // Dynamically reference based on `categoryType`
+    refPath: 'categoryType' 
   },
   serviceName: { type: String, required: true },
   price: { type: Number, required: true },
@@ -15,7 +15,14 @@ const itemSchema = new mongoose.Schema({
     type: String,
     required: true,
     enum: ['Service', 'Addon']  // Must match your actual model names
-  }
+  },
+  customizedInputs: [
+    {
+      label: { type: String },
+      value: mongoose.Schema.Types.Mixed, // allows string, number, array, etc.
+    },
+  ]
+
 });
 
 const orderSchema = new mongoose.Schema({
@@ -29,9 +36,9 @@ const orderSchema = new mongoose.Schema({
   subTotal: { type: Number, required: true },
   grandTotal: { type: Number, required: true },
   paidAmount: { type: Number, required: true },
-  dueAmount: { type: Number, required: true },
-  deliveryCharges: { type: Number, required: true },
-  couponDiscount: { type: Number, default: 0 },
+  dueAmount: { type: Number},
+  deliveryCharges: { type: Number },
+  couponDiscount: { type: Number },
   gstAmount: { type: Number, required: true },
 
   orderStatus: {

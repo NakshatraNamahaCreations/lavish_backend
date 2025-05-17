@@ -1,81 +1,6 @@
 import Service from "../../models/serviceManagement/Service.js";
+import Subcategory from "../../models/category/Subcategory.js";
 
-// export const createService = async (req, res) => {
-//   try {
-//     const {
-//       serviceName,
-//       categoryId,
-//       subCategoryId,
-//       subSubCategoryId,
-//       themeId,
-//       packageDetails,
-//       requiredDetails,
-//       customizedInputs,
-//       balloonColors,
-//       originalPrice,
-//       offerPrice,
-//     } = req.body;
-
-//     // Validate required fields
-//     if (
-//       !serviceName ||
-//       !categoryId ||
-//       !subCategoryId ||
-//       !packageDetails ||
-//       !originalPrice ||
-//       !offerPrice ||
-//       !balloonColors ||
-//       !req.files // Check for multiple files
-//     ) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Please provide all required fields",
-//       });
-//     }
-
-//     // ✅ Convert back from JSON string to actual arrays
-//     const parsedCustomizedInputs = customizedInputs
-//       ? JSON.parse(customizedInputs)
-//       : [];
-//     const parsedBalloonColors = balloonColors ? JSON.parse(balloonColors) : [];
-
-//     // Save the image paths
-//     const imagePaths = req.files.map(
-//       (file) => file.filename
-//     );
-
-//     // Create a new service
-//     const newService = new Service({
-//       serviceName,
-//       categoryId,
-//       subCategoryId,
-//       subSubCategoryId: subSubCategoryId || null,
-//       themeId: themeId || null,
-//       packageDetails,
-//       requiredDetails: requiredDetails || null,
-//       customizedInputs: parsedCustomizedInputs,
-//       balloonColors: parsedBalloonColors,
-//       originalPrice: Number(originalPrice),
-//       offerPrice: Number(offerPrice),
-//       images: imagePaths,
-//     });
-
-//     await newService.save();
-
-//     return res.status(201).json({
-//       success: true,
-//       message: "Service created successfully",
-//       data: newService,
-//     });
-//   } catch (error) {
-//     console.error("Error creating service:", error);
-//     return res.status(500).json({
-//       success: false,
-//       message: "Failed to create service",
-//       error: error.message,
-//     });
-//   }
-// };
 export const createService = async (req, res) => {
   try {
     const {
@@ -172,114 +97,6 @@ export const createService = async (req, res) => {
 };
 
 
-// export const updateService = async (req, res) => {
-//   try {
-//     const { serviceId } = req.params;
-//     const {
-//       serviceName,
-//       categoryId,
-//       subCategoryId,
-//       subSubCategoryId,
-//       themeId,
-//       packageDetails,
-//       requiredDetails,
-//       customizedInputs,
-//       balloonColors,
-//       originalPrice,
-//       offerPrice,
-//     } = req.body;
-
-//     // Check if the service exists
-//     const service = await Service.findById(serviceId);
-//     if (!service) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Service not found",
-//       });
-//     }
-
-//     // Safely parse JSON strings to arrays
-//     let parsedCustomizedInputs = service.customizedInputs;
-//     let parsedBalloonColors = service.balloonColors;
-
-//     try {
-//       parsedCustomizedInputs = customizedInputs
-//         ? JSON.parse(customizedInputs)
-//         : service.customizedInputs;
-//     } catch (error) {
-//       console.error("Error parsing customizedInputs:", error);
-//       return res.status(400).json({
-//         success: false,
-//         message: "Invalid format for customizedInputs",
-//       });
-//     }
-
-//     try {
-//       parsedBalloonColors = balloonColors
-//         ? JSON.parse(balloonColors)
-//         : service.balloonColors;
-//     } catch (error) {
-//       console.error("Error parsing balloonColors:", error);
-//       return res.status(400).json({
-//         success: false,
-//         message: "Invalid format for balloonColors",
-//       });
-//     }
-
-//     // Convert empty strings to null for ObjectId fields
-//     const sanitizedSubSubCategoryId =
-//       subSubCategoryId === "" ? null : subSubCategoryId;
-//     const sanitizedThemeId = themeId === "" ? null : themeId;
-
-//     // Update the service fields
-//     const updateField = (newValue, existingValue) =>
-//       newValue !== undefined ? newValue : existingValue;
-
-//     service.serviceName = updateField(serviceName, service.serviceName);
-//     service.categoryId = updateField(categoryId, service.categoryId);
-//     service.subCategoryId = updateField(subCategoryId, service.subCategoryId);
-//     service.subSubCategoryId = updateField(
-//       sanitizedSubSubCategoryId,
-//       service.subSubCategoryId
-//     );
-//     service.themeId = updateField(sanitizedThemeId, service.themeId);
-//     service.packageDetails = updateField(
-//       packageDetails,
-//       service.packageDetails
-//     );
-//     service.requiredDetails = updateField(
-//       requiredDetails,
-//       service.requiredDetails
-//     );
-//     service.customizedInputs = parsedCustomizedInputs;
-//     service.balloonColors = parsedBalloonColors;
-//     service.originalPrice = updateField(originalPrice, service.originalPrice);
-//     service.offerPrice = updateField(offerPrice, service.offerPrice);
-
-//     // Update images if new files are uploaded
-//     if (req.files && req.files.length > 0) {
-//       service.images = req.files.map(
-//         (file) => file.filename
-//       );
-//     }
-
-//     // Save the updated service
-//     await service.save();
-
-//     return res.status(200).json({
-//       success: true,
-//       message: "Service updated successfully",
-//       data: service,
-//     });
-//   } catch (error) {
-//     console.error("Error updating service:", error);
-//     return res.status(500).json({
-//       success: false,
-//       message: "Failed to update service",
-//       error: error.message,
-//     });
-//   }
-// };
 export const updateService = async (req, res) => {
   try {
     const { serviceId } = req.params;
@@ -571,7 +388,6 @@ export const getServiceById = async (req, res) => {
   }
 };
 
-
 export const getServiceCount = async (req, res) => {
   try {
     const totalCount = await Service.countDocuments();
@@ -589,9 +405,6 @@ export const getServiceCount = async (req, res) => {
     });
   }
 }
-
-
-
 
 
 export const deleteService = async (req, res) => {
@@ -621,7 +434,6 @@ export const deleteService = async (req, res) => {
     });
   }
 };
-
 
 // Controller to get services by subCategoryId, subSubCategoryId, or themeId
 export const getServicesByCategoryOrTheme = async (req, res) => {
@@ -660,5 +472,62 @@ export const getServicesByCategoryOrTheme = async (req, res) => {
     });
   }
 };
+
+
+export const getServicesBySubCategory = async (req, res) => {
+  try {
+    const { subCategoryName } = req.params; // Get subcategory name from URL
+
+    console.log(`➡️ Fetching services for subcategory: ${subCategoryName}`);
+
+    // Step 1: Find the subcategory by name (case-insensitive)
+    const subCategory = await Subcategory.findOne({
+      subCategory: { $regex: new RegExp(`^${subCategoryName}$`, "i") }
+    });
+
+    if (!subCategory) {
+      console.warn(`❌ Subcategory '${subCategoryName}' not found.`);
+      return res.status(404).json({
+        success: false,
+        message: `Subcategory '${subCategoryName}' not found.`,
+      });
+    }
+
+    console.log(`✅ Found Subcategory ID: ${subCategory._id}`);
+
+    // Step 2: Find all services with the matching subCategoryId
+    const services = await Service.find({
+      subCategoryId: subCategory._id,
+    })
+      .populate("categoryId", "category")
+      .populate("subCategoryId", "subCategory")
+      .populate("subSubCategoryId", "subSubCategory")
+      .populate("themeId", "theme");
+
+    if (!services.length) {
+      console.warn(`❌ No services found under '${subCategoryName}' subcategory.`);
+      return res.status(404).json({
+        success: false,
+        message: `No services found for '${subCategoryName}' subcategory.`,
+      });
+    }
+
+    console.log(`✅ Found ${services.length} service(s) under '${subCategoryName}'`);
+
+    return res.status(200).json({
+      success: true,
+      data: services,
+    });
+
+  } catch (error) {
+    console.error(`🔥 Error fetching services for '${req.params.subCategoryName}':`, error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch services.",
+      error: error.message,
+    });
+  }
+};
+
 
 

@@ -3,6 +3,12 @@ import Order from "../../models/order/Order.js"
 
 export const createOrder = async (req, res) => {
   try {
+    console.log('Request Body:', req.body);
+    console.log('Customer Details:', {
+      name: req.body.customerName,
+      id: req.body.customerId
+    });
+
     const {
       orderId,
       eventDate,
@@ -23,32 +29,76 @@ export const createOrder = async (req, res) => {
       items
     } = req.body;
 
+    // Validate required fields
+    if (!orderId || !eventDate || !eventTime || !pincode || !subTotal || 
+        !grandTotal || !paidAmount || !gstAmount || 
+        !address || !items || items.length === 0) {
+      return res.status(400).json({ 
+        message: 'Missing required fields',
+        required: {
+          orderId: !orderId,
+          eventDate: !eventDate,
+          eventTime: !eventTime,
+          pincode: !pincode,
+          subTotal: !subTotal,
+          grandTotal: !grandTotal,
+          paidAmount: !paidAmount,
+          deliveryCharges: !deliveryCharges,
+          gstAmount: !gstAmount,
+          address: !address,
+          items: !items || items.length === 0
+        }
+      });
+    }
+
+    // Ensure each item has customizedInputs (default to empty array if not provided)
+    const processedItems = items.map(item => ({
+      ...item,
+      customizedInputs: Array.isArray(item.customizedInputs) ? item.customizedInputs : []
+    }));
+
+    console.log('Creating order with customer details:', {
+      customerName,
+      customerId
+    });
 
     const order = new Order({
       orderId,
       eventDate,
       eventTime,
       pincode,
-      balloonsColor,
+      balloonsColor: balloonsColor || [],
       subTotal,
       grandTotal,
       paidAmount,
-      dueAmount,
+      dueAmount: dueAmount || 0,
       deliveryCharges,
-      couponDiscount,
+      couponDiscount: couponDiscount || 0,
       gstAmount,
-      paymentType,
+      paymentType: paymentType || 'full',
       address,
-      items,
-      customerName,
-      customerId
+      items: processedItems,
+      customerName: customerName || 'Guest',
+      customerId: customerId || null,
+      orderStatus: 'created' // Set default status
     });
-    const savedOrder = await order.save();
 
-    res.status(201).json(savedOrder);
+    console.log('Final order object:', order);
+
+    const savedOrder = await order.save();
+    console.log('Saved order:', savedOrder);
+
+    res.status(201).json({
+      success: true,
+      data: savedOrder
+    });
   } catch (error) {
     console.error('Error creating order:', error);
-    res.status(500).json({ message: 'Error creating order', error: error.message });
+    res.status(500).json({ 
+      success: false,
+      message: 'Error creating order', 
+      error: error.message 
+    });
   }
 };
 

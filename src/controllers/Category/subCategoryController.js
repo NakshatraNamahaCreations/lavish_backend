@@ -134,6 +134,53 @@ export const deleteSubCategory = async (req, res) => {
   }
 };
 
+export const searchSubCategory = async (req, res) => {
+  try {
+    const { searchText } = req.params;
+    console.log('Searching for subcategory with text:', searchText);
+
+    if (!searchText) {
+      return res.status(400).json({
+        success: false,
+        message: "Search text is required"
+      });
+    }
+
+    // Clean and prepare the search text
+    const cleanedSearchText = searchText.trim().toLowerCase();
+    console.log('Cleaned search text:', cleanedSearchText);
+
+    // First, fetch all subcategories
+    const allSubcategories = await SubCategory.find()
+      .populate("category", "category");
+    
+    console.log('Total subcategories found:', allSubcategories.length);
+
+    // Filter subcategories where the search text is included in the subCategory name
+    const matchingSubcategories = allSubcategories.filter(subcategory => 
+      subcategory.subCategory.toLowerCase().includes(cleanedSearchText)
+    );
+
+    console.log('Matching subcategories found:', matchingSubcategories.length);
+
+    // If no subcategories found, return empty array
+    return res.status(200).json({
+      success: true,
+      count: matchingSubcategories.length,
+      data: matchingSubcategories,
+      searchText: cleanedSearchText // Include the search text in response for debugging
+    });
+
+  } catch (error) {
+    console.error("Error searching subcategories:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to search subcategories",
+      error: error.message
+    });
+  }
+};
+
 export const getSubCategoriesByCategory = async (req, res) => {
   try {
     const { categoryId } = req.params;

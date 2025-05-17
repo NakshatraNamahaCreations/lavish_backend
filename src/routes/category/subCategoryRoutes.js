@@ -4,7 +4,8 @@ import {
     getAllSubCategories,
     getSubCategoriesByCategory,
     deleteSubCategory,
-    updatedSubcategory
+    updatedSubcategory,
+    searchSubCategory
 } from '../../controllers/Category/subCategoryController.js';
 
 import { adminauthenticateToken } from "../../middleware/admin/authMiddleware.js"
@@ -17,5 +18,6 @@ router.put('/update/:id',  updatedSubcategory);
 
 router.get('/', getAllSubCategories);
 router.get('/category/:categoryId', getSubCategoriesByCategory);
+router.get('/search/:searchText', searchSubCategory);
 
 export default router; 

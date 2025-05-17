@@ -311,6 +311,7 @@ export const getAllAddons = async (req, res) => {
           createdAt: "$addons.createdAt",
           subCategoryId: "$subCategoryDoc._id",
           subCategory: "$subCategoryDoc.subCategory",
+          customizedInputs: "$addons.customizedInputs",
         },
       },
     ];
