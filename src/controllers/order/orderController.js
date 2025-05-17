@@ -1,5 +1,6 @@
 // controllers/orderController.js
 import Order from "../../models/order/Order.js"
+import moment from 'moment';
 
 export const createOrder = async (req, res) => {
   try {
@@ -30,10 +31,10 @@ export const createOrder = async (req, res) => {
     } = req.body;
 
     // Validate required fields
-    if (!orderId || !eventDate || !eventTime || !pincode || !subTotal || 
-        !grandTotal || !paidAmount || !gstAmount || 
-        !address || !items || items.length === 0) {
-      return res.status(400).json({ 
+    if (!orderId || !eventDate || !eventTime || !pincode || !subTotal ||
+      !grandTotal || !paidAmount || !gstAmount ||
+      !address || !items || items.length === 0) {
+      return res.status(400).json({
         message: 'Missing required fields',
         required: {
           orderId: !orderId,
@@ -94,22 +95,95 @@ export const createOrder = async (req, res) => {
     });
   } catch (error) {
     console.error('Error creating order:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      message: 'Error creating order', 
-      error: error.message 
+      message: 'Error creating order',
+      error: error.message
+    });
+  }
+};
+
+export const getUserUpcomingOrders = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const currentDate = moment().format("MMMM DD, YYYY"); // "May 17, 2025"
+
+    const upcomingOrders = await Order.find({
+      customerId: userId,
+      eventDate: { $gte: currentDate } // assuming stored as "May 18, 2025" etc.
+    }).sort({ eventDate: 1 });
+
+    res.status(200).json({
+      success: true,
+      data: upcomingOrders,
+      length: upcomingOrders.length,
+    });
+  } catch (error) {
+    console.error('Error fetching upcoming orders:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching upcoming orders',
+      error: error.message,
     });
   }
 };
 
 
+
+export const getUserPastOrders = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const currentDate = moment().format("MMMM DD, YYYY"); // "May 17, 2025"
+
+    const pastOrders = await Order.find({
+      customerId: userId,
+      eventDate: { $lt: currentDate } // assuming stored as "May 16, 2025" etc.
+    }).sort({ eventDate: -1 });
+
+    res.status(200).json({
+      success: true,
+      data: pastOrders,
+      length: pastOrders.length,
+    });
+  } catch (error) {
+    console.error('Error fetching past orders:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching past orders',
+      error: error.message,
+    });
+  }
+};
+
+
+
 export const getUserOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ customerId: "681db1b5117e43dd67dde994" }).sort({ createdAt: -1 });
-    res.json(orders);
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'User ID is required'
+      });
+    }
+
+    const orders = await Order.find({ customerId: userId })
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      data: orders
+    });
   } catch (error) {
     console.error('Error fetching orders:', error);
-    res.status(500).json({ message: 'Error fetching orders', error: error.message });
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching orders',
+      error: error.message
+    });
   }
 };
 
