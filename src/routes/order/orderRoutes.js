@@ -1,5 +1,5 @@
 import express from 'express';
-import { createOrder, getUserOrders, getUserUpcomingOrders, getUserPastOrders, getAllOrders, getOrderCount, getOrdersByStatus, getOrderDetailsbyId, cancelOrder, rescheduleOrder } from '../../controllers/order/orderController.js';
+import { createOrder, getUserOrders, getUserUpcomingOrders, getUserPastOrders, getAllOrders, getOrderCount, getOrdersByStatus, getOrderDetailsbyId, cancelOrder, rescheduleOrder, getRecentOrders } from '../../controllers/order/orderController.js';
 
 const router = express.Router();
 
@@ -33,5 +33,7 @@ router.get('/upcoming/:userId', getUserUpcomingOrders);
 
 // Route to get past orders for a user
 router.get('/past/:userId', getUserPastOrders);
+
+router.get('/recent-orders', getRecentOrders);
 
 export default router;

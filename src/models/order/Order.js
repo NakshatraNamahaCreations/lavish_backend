@@ -14,7 +14,7 @@ const itemSchema = new mongoose.Schema({
   categoryType: {
     type: String,
     required: true,
-    enum: ['Service', 'Addon']  // Must match your actual model names
+    enum: ['Service', 'Addon']  
   },
   customizedInputs: [
     {
@@ -30,9 +30,13 @@ const orderSchema = new mongoose.Schema({
   eventDate: { type: String, required: true },
   eventTime: { type: String, required: true },
   rescheduledEventDate: { type: String },
+  rescheduledEventTime: { type: String },
   rescheduledAddress: { type: String },
   pincode: { type: String, required: true },
-  balloonsColor: [String],
+  balloonsColor: {
+    type: [String],
+    required: true,
+  },
   subTotal: { type: Number, required: true },
   grandTotal: { type: Number, required: true },
   paidAmount: { type: Number, required: true },
@@ -40,7 +44,7 @@ const orderSchema = new mongoose.Schema({
   deliveryCharges: { type: Number },
   couponDiscount: { type: Number },
   gstAmount: { type: Number, required: true },
-
+  addNote: { type: String },
   orderStatus: {
     type: String,
     required: true,
@@ -49,9 +53,12 @@ const orderSchema = new mongoose.Schema({
   },
   reason: { type: String },
   address: { type: String, required: true },
-  customerName: { type: String },
-  customerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  items: [itemSchema]
+  customerName: { type: String, required: true },
+  customerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  items: [itemSchema],
+  altMobile: { type: String },
+  occasion: { type: String },
+  source: { type: String },
 }, { timestamps: true });
 
 

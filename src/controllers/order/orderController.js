@@ -27,7 +27,11 @@ export const createOrder = async (req, res) => {
       address,
       customerName,
       customerId,
-      items
+      items,
+      addNote,
+      occasion,
+      source,
+      altMobile
     } = req.body;
 
     // Validate required fields
@@ -76,12 +80,16 @@ export const createOrder = async (req, res) => {
       deliveryCharges,
       couponDiscount: couponDiscount || 0,
       gstAmount,
-      paymentType: paymentType || 'full',
+      addNote,
+      // paymentType: paymentType || 'full',
       address,
       items: processedItems,
-      customerName: customerName || 'Guest',
-      customerId: customerId || null,
-      orderStatus: 'created' // Set default status
+      customerName: customerName,
+      customerId: customerId,
+      orderStatus: 'created',
+      occasion,
+      source,
+      altMobile
     });
 
     console.log('Final order object:', order);
@@ -347,37 +355,83 @@ export const cancelOrder = async (req, res) => {
 export const rescheduleOrder = async (req, res) => {
   try {
     const { id } = req.params;
-    const { rescheduledDate, rescheduledAddress, reason } = req.body;
+    const {
+      rescheduledDate,
+      rescheduledTime,
+      rescheduledAddress,
+      reason,
+    } = req.body;
 
-    // Validate input
-    if (!id || (!rescheduledDate && !rescheduledAddress) || !reason) {
+    // Validation: ID and reason must be provided, and at least one field (date/time/address)
+    if (
+      !id ||
+      !reason ||
+      (!rescheduledDate && !rescheduledTime && !rescheduledAddress)
+    ) {
       return res.status(400).json({
-        message: "Order ID, at least one of rescheduled date or address, and reason are required"
+        message:
+          "Order ID, reason, and at least one of rescheduled date, time, or address are required.",
       });
     }
 
-    // Find the order by ID
-    const order = await Order.findOne({ _id: id });
-
+    // Find order
+    const order = await Order.findById(id);
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    // Update the order with new rescheduled details
-    order.rescheduledEventDate = rescheduledDate;
-    order.rescheduledAddress = rescheduledAddress;
-    order.reason = reason;
-    order.orderStatus = "rescheduled"; // Optionally, you can set the order status to "rescheduled"
+    // Update fields only if provided
+    if (rescheduledDate) order.rescheduledEventDate = rescheduledDate;
+    if (rescheduledTime) order.rescheduledEventTime = rescheduledTime;
+    if (rescheduledAddress) order.rescheduledAddress = rescheduledAddress;
 
-    // Save the updated order
+    order.reason = reason;
+    order.orderStatus = "rescheduled";
+
     await order.save();
 
-    return res.json({ message: "Order rescheduled successfully", order });
+    return res.json({
+      message: "Order rescheduled successfully",
+      order,
+    });
   } catch (error) {
     console.error("Error rescheduling order:", error);
-    res.status(500).json({ message: "Failed to reschedule the order", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to reschedule the order", error: error.message });
   }
 };
+
+
+export const getRecentOrders = async (req, res) => {
+  try {
+    const recentOrders = await Order.find()
+      .sort({ createdAt: -1 }) // Sort by creation date in descending order
+      .limit(6) // Limit to 10 most recent orders
+      .populate('customerId', 'name email') // Populate customer details
+      .populate('items.refId'); // Populate service/addon details
+
+    if (!recentOrders.length) {
+      return res.status(404).json({ message: "No orders found" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Recent orders fetched successfully",
+      orders: recentOrders
+    });
+
+  } catch (error) {
+    console.error("Error fetching recent orders:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch recent orders",
+      error: error.message
+    });
+  }
+};
+
+
 
 
 

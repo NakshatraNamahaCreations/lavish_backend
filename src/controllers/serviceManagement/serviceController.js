@@ -1,5 +1,6 @@
 import Service from "../../models/serviceManagement/Service.js";
 import Subcategory from "../../models/category/Subcategory.js";
+import SubSubCategory from "../../models/category/Subsubcategory.js";
 
 export const createService = async (req, res) => {
   try {
@@ -528,6 +529,47 @@ export const getServicesBySubCategory = async (req, res) => {
     });
   }
 };
+
+export const getServiceBySearchValue = async (req, res) => {
+  try {
+    const { searchValue } = req.params;
+
+    if (!searchValue) {
+      return res.status(400).json({
+        success: false,
+        message: "Search value is required",
+      });
+    }
+
+    const regex = new RegExp(searchValue, "i");
+
+    const services = await Service.find({ serviceName: { $regex: regex } })
+      .limit(6)
+
+    if (!services.length) {
+      return res.status(404).json({
+        success: false,
+        message: `No services found matching "${searchValue}"`,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: services,
+    });
+  } catch (error) {
+    console.error(`Search error:`, error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+
+
+
 
 
 

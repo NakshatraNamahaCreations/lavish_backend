@@ -7,7 +7,9 @@ import {
   deleteService,
   getServicesByCategoryOrTheme,
   getServiceCount,
-  getServicesBySubCategory
+  getServicesBySubCategory,
+  getServiceBySearchValue,
+
 } from "../../controllers/serviceManagement/serviceController.js";
 import { adminauthenticateToken } from "../../middleware/admin/authMiddleware.js";
 import upload from "../../middleware/multer/multiUploadMulter.js";
@@ -47,5 +49,6 @@ router.get("/:serviceId", getServiceById);
 
 router.get("/filter/:id", getServicesByCategoryOrTheme);
 router.get("/by-subcategory/:subCategoryName", getServicesBySubCategory);
+router.get("/search/:searchValue", getServiceBySearchValue);
 
 export default router;
