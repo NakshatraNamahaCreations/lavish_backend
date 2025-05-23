@@ -1,5 +1,6 @@
 // controllers/orderController.js
 import Order from "../../models/order/Order.js"
+import Service from "../../models/serviceManagement/Service.js"
 import moment from 'moment';
 
 export const createOrder = async (req, res) => {
@@ -426,6 +427,121 @@ export const getRecentOrders = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to fetch recent orders",
+      error: error.message
+    });
+  }
+};
+
+
+// export const getRecentOrdersByUser = async (req, res) => {
+//   try {
+//     const { userId } = req.params;
+
+//     if (!userId) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "User ID is required"
+//       });
+//     }
+
+//     // Find recent orders for the user
+//     const recentOrders = await Order.find({ customerId: userId })
+//       .sort({ createdAt: -1 }) // Sort by creation date in descending order
+//       .limit(5) // Limit to 5 most recent orders
+//       .populate('customerId', 'name email') // Populate customer details
+//       .populate('items.refId'); // Populate service/addon details
+
+//     if (!recentOrders.length) {
+//       return res.status(404).json({ 
+//         success: false,
+//         message: "No orders found for this user" 
+//       });
+//     }
+
+//     return res.status(200).json({
+//       success: true,
+//       message: "Recent orders fetched successfully",
+//       orders: recentOrders
+//     });
+
+//   } catch (error) {
+//     console.error("Error fetching recent orders:", error);
+//     return res.status(500).json({
+//       success: false,
+//       message: "Failed to fetch recent orders",
+//       error: error.message
+//     });
+//   }
+// };
+
+
+
+export const getRecentOrdersByUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required"
+      });
+    }
+
+    // Step 1: Get recent 5 orders (most recent first)
+    const recentOrders = await Order.find({ customerId: userId })
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    if (!recentOrders.length) {
+      return res.status(404).json({
+        success: false,
+        message: "No orders found for this user"
+      });
+    }
+
+    const serviceItemList = [];
+
+    // Step 2: Collect all service item data and refIds
+    recentOrders.forEach(order => {
+      order.items.forEach(item => {
+        if (item.categoryType === 'Service' && item.refId) {
+          serviceItemList.push({
+            serviceId: item.refId,
+            quantity: item.quantity,
+            customizedInputs: item.customizedInputs,
+            orderDate: order.createdAt,
+            orderId: order.orderId,
+          });
+        }
+      });
+    });
+
+    const uniqueServiceIds = [...new Set(serviceItemList.map(i => i.serviceId.toString()))];
+
+    // Step 3: Fetch full service data
+    const services = await Service.find({ _id: { $in: uniqueServiceIds } });
+
+    // Step 4: Merge service info with order data
+    const merged = serviceItemList.map(serviceItem => {
+      const service = services.find(s => s._id.toString() === serviceItem.serviceId.toString());
+
+      return {
+        ...serviceItem,
+        serviceDetails: service || null,
+      };
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Recent service details fetched successfully",
+      services: merged
+    });
+
+  } catch (error) {
+    console.error("Error fetching recent service details:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch recent service details",
       error: error.message
     });
   }

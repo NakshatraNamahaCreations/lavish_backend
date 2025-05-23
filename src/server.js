@@ -24,6 +24,7 @@ import bannerRoutes from "./routes/bannerRoutes.js";
 import orderRoutes from "./routes/order/orderRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import wishlistRoutes from "./routes/wishlistRoutes.js";
+import enquiryRoutes from "./routes/enquiry/enquiryRoutes.js";
 
 dotenv.config();
 connectDB();
@@ -32,7 +33,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors({ credentials: true, origin: "http://localhost:5174" }));
+app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
@@ -57,7 +58,8 @@ app.use("/api/services", serviceRoutes);
 app.use("/api/banners", bannerRoutes);
 app.use("/api/orders", orderRoutes);
 app.use('/api/reviews', reviewRoutes)
-app.use('/api/wishlist', wishlistRoutes)
+app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/enquiries', enquiryRoutes);
 
 // Root
 app.get("/", (req, res) => res.send("🚀 Lavish Events Auth Server Running!"));

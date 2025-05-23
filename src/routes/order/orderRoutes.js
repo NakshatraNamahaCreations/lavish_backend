@@ -1,5 +1,5 @@
 import express from 'express';
-import { createOrder, getUserOrders, getUserUpcomingOrders, getUserPastOrders, getAllOrders, getOrderCount, getOrdersByStatus, getOrderDetailsbyId, cancelOrder, rescheduleOrder, getRecentOrders } from '../../controllers/order/orderController.js';
+import { createOrder, getUserOrders, getUserUpcomingOrders, getUserPastOrders, getAllOrders, getOrderCount, getOrdersByStatus, getOrderDetailsbyId, cancelOrder, rescheduleOrder, getRecentOrders, getRecentOrdersByUser } from '../../controllers/order/orderController.js';
 
 const router = express.Router();
 
@@ -35,5 +35,6 @@ router.get('/upcoming/:userId', getUserUpcomingOrders);
 router.get('/past/:userId', getUserPastOrders);
 
 router.get('/recent-orders', getRecentOrders);
+router.get('/recent-orders/:userId', getRecentOrdersByUser);
 
 export default router;
