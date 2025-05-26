@@ -1,5 +1,5 @@
 import express from "express";
-import { submitInquiry, getEnquiries, updateInquiryStatus } from "../../controllers/enquiry/enquiryController.js";
+import { submitInquiry, getEnquiries } from "../../controllers/enquiry/enquiryController.js";
 
 const router = express.Router();
 
@@ -7,7 +7,7 @@ const router = express.Router();
 router.post("/create", submitInquiry);
 
 // PATCH /api/enquiries/:id/status - Update status of an existing enquiry
-router.put("/:id/status", updateInquiryStatus);
+// router.put("/:id/status", updateInquiryStatus);
 
 // GET /api/enquiries - Get all enquiries
 router.get("/", getEnquiries);

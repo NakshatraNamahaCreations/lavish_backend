@@ -1,5 +1,5 @@
 import express from 'express';
-import { createOrder, getUserOrders, getUserUpcomingOrders, getUserPastOrders, getAllOrders, getOrderCount, getOrdersByStatus, getOrderDetailsbyId, cancelOrder, rescheduleOrder, getRecentOrders, getRecentOrdersByUser } from '../../controllers/order/orderController.js';
+import { createOrder, getUserOrders, getUserUpcomingOrders, getUserPastOrders, getAllOrders, getOrderCount, getOrdersByStatus, getOrderDetailsbyId, cancelOrder, rescheduleOrder, getRecentOrders, getRecentOrdersByUser, updateOrderStatus } from '../../controllers/order/orderController.js';
 
 const router = express.Router();
 
@@ -25,7 +25,7 @@ router.get('/getCount', getOrderCount);
 router.get('/getordersbystatus', getOrdersByStatus);
 
 // Get order details by ID
-router.get('/getOrderDetails/:id', getOrderDetailsbyId);
+router.get('/orderDetails/:id', getOrderDetailsbyId);
 
 
 // Route to get upcoming orders for a user
@@ -36,5 +36,7 @@ router.get('/past/:userId', getUserPastOrders);
 
 router.get('/recent-orders', getRecentOrders);
 router.get('/recent-orders/:userId', getRecentOrdersByUser);
+
+router.put('/updateOrderStatus/:orderId', updateOrderStatus);
 
 export default router;

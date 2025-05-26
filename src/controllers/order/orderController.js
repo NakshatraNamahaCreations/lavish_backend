@@ -31,6 +31,9 @@ export const createOrder = async (req, res) => {
       items,
       addNote,
       occasion,
+      decorLocation,
+      otherOccasion,
+      otherDecorLocation,
       source,
       altMobile
     } = req.body;
@@ -89,6 +92,9 @@ export const createOrder = async (req, res) => {
       customerId: customerId,
       orderStatus: 'created',
       occasion,
+      decorLocation,
+      otherOccasion,
+      otherDecorLocation,
       source,
       altMobile
     });
@@ -165,8 +171,6 @@ export const getUserPastOrders = async (req, res) => {
     });
   }
 };
-
-
 
 export const getUserOrders = async (req, res) => {
   try {
@@ -287,16 +291,32 @@ export const getOrderDetailsbyId = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const order = await Order.findOne({ _id: id });
+    // Validate if id is provided
+    if (!id) {
+      return res.status(400).json({ message: 'Order ID is required' });
+    }
+
+    // Find order by ID and populate related fields if needed
+    const order = await Order.findOne({ _id: id })
+   
 
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
     }
 
-    res.json(order);
+    // Return success response with order details
+    return res.status(200).json({
+      success: true,
+      data: order
+    });
+
   } catch (error) {
     console.error('Error fetching order details:', error);
-    res.status(500).json({ message: 'Error fetching order details', error: error.message });
+    return res.status(500).json({ 
+      success: false,
+      message: 'Error fetching order details', 
+      error: error.message 
+    });
   }
 };
 
@@ -403,7 +423,6 @@ export const rescheduleOrder = async (req, res) => {
   }
 };
 
-
 export const getRecentOrders = async (req, res) => {
   try {
     const recentOrders = await Order.find()
@@ -433,48 +452,51 @@ export const getRecentOrders = async (req, res) => {
 };
 
 
-// export const getRecentOrdersByUser = async (req, res) => {
-//   try {
-//     const { userId } = req.params;
+export const updateOrderStatus = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { status, reason } = req.body;
 
-//     if (!userId) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "User ID is required"
-//       });
-//     }
+    if (!orderId || !status) {
+      return res.status(400).json({
+        success: false,
+        message: "Order ID and status are required"
+      });
+    }
 
-//     // Find recent orders for the user
-//     const recentOrders = await Order.find({ customerId: userId })
-//       .sort({ createdAt: -1 }) // Sort by creation date in descending order
-//       .limit(5) // Limit to 5 most recent orders
-//       .populate('customerId', 'name email') // Populate customer details
-//       .populate('items.refId'); // Populate service/addon details
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found"
+      });
+    }
 
-//     if (!recentOrders.length) {
-//       return res.status(404).json({ 
-//         success: false,
-//         message: "No orders found for this user" 
-//       });
-//     }
+    // Update order status
+    order.orderStatus = status;
+    
+    // If status is cancelled, add reason
+    if (status === "cancelled" && reason) {
+      order.reason = reason;
+    }
 
-//     return res.status(200).json({
-//       success: true,
-//       message: "Recent orders fetched successfully",
-//       orders: recentOrders
-//     });
+    await order.save();
 
-//   } catch (error) {
-//     console.error("Error fetching recent orders:", error);
-//     return res.status(500).json({
-//       success: false,
-//       message: "Failed to fetch recent orders",
-//       error: error.message
-//     });
-//   }
-// };
+    return res.status(200).json({
+      success: true,
+      message: "Order status updated successfully",
+      order
+    });
 
-
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update order status",
+      error: error.message
+    });
+  }
+};
 
 export const getRecentOrdersByUser = async (req, res) => {
   try {

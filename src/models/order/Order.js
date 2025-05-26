@@ -4,7 +4,7 @@ const itemSchema = new mongoose.Schema({
   refId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    refPath: 'categoryType' 
+    refPath: 'categoryType'
   },
   serviceName: { type: String, required: true },
   price: { type: Number, required: true },
@@ -14,7 +14,7 @@ const itemSchema = new mongoose.Schema({
   categoryType: {
     type: String,
     required: true,
-    enum: ['Service', 'Addon']  
+    enum: ['Service', 'Addon']
   },
   customizedInputs: [
     {
@@ -40,7 +40,7 @@ const orderSchema = new mongoose.Schema({
   subTotal: { type: Number, required: true },
   grandTotal: { type: Number, required: true },
   paidAmount: { type: Number, required: true },
-  dueAmount: { type: Number},
+  dueAmount: { type: Number },
   deliveryCharges: { type: Number },
   couponDiscount: { type: Number },
   gstAmount: { type: Number, required: true },
@@ -58,6 +58,9 @@ const orderSchema = new mongoose.Schema({
   items: [itemSchema],
   altMobile: { type: String },
   occasion: { type: String },
+  otherOccasion: { type: String },
+  otherDecorLocation: { type: String },
+  decorLocation: { type: String },
   source: { type: String },
 }, { timestamps: true });
 

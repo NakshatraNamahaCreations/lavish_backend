@@ -28,20 +28,20 @@ const EnquirySchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
-    status: {
-      type: String,
-      enum: [
-        "",
-        "Interested",
-        "Not Interested",
-        "Follow Up",
-        "Converted",
-        "Spam",
-        "Pending",
-      ],
-      default: "",
-      trim: true,
-    },
+    // status: {
+    //   type: String,
+    //   enum: [
+    //     "",
+    //     "Interested",
+    //     "Not Interested",
+    //     "Follow Up",
+    //     "Converted",
+    //     "Spam",
+    //     "Pending",
+    //   ],
+    //   default: "",
+    //   trim: true,
+    // },
   },
   { timestamps: true }
 );

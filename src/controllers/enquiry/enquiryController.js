@@ -22,30 +22,30 @@ export const submitInquiry = async (req, res) => {
 
 
 // PATCH /api/enquiries/:id/status
-export const updateInquiryStatus = async (req, res) => {
-    const { id } = req.params;
-    const { status } = req.body;
+// export const updateInquiryStatus = async (req, res) => {
+//     const { id } = req.params;
+//     const { status } = req.body;
 
-    try {
-        const updated = await Enquiry.findByIdAndUpdate(
-            id,
-            { status },
-            { new: true, runValidators: true }
-        );
+//     try {
+//         const updated = await Enquiry.findByIdAndUpdate(
+//             id,
+//             { status },
+//             { new: true, runValidators: true }
+//         );
 
-        if (!updated) {
-            return res.status(404).json({ success: false, message: "Inquiry not found" });
-        }
+//         if (!updated) {
+//             return res.status(404).json({ success: false, message: "Inquiry not found" });
+//         }
 
-        res.status(200).json({ success: true, data: updated });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Failed to update status",
-            error: error.message,
-        });
-    }
-};
+//         res.status(200).json({ success: true, data: updated });
+//     } catch (error) {
+//         res.status(500).json({
+//             success: false,
+//             message: "Failed to update status",
+//             error: error.message,
+//         });
+//     }
+// };
 
 
 export const getEnquiries = async (req, res) => {

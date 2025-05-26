@@ -43,8 +43,8 @@ const UserSchema = new mongoose.Schema({
   addressLine1: { type: String, trim: true },
   addressLine2: { type: String, trim: true },
   city: { type: String, trim: true },
-  state: { type: String, trim: true },
-  landmark: { type: String, trim: true },
+  // state: { type: String, trim: true },
+  // landmark: { type: String, trim: true },
   pincode: { 
     type: String,
     trim: true,
