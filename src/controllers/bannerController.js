@@ -49,9 +49,12 @@ export const getBanners = async (req, res) => {
 export const updateBanner = async (req, res) => {
   const { id } = req.params;
   const { bannerLink, bannerType } = req.body;
-  console.log(bannerLink, bannerType, req.file);
 
-  if (!bannerLink || !bannerType) {
+  console.log("Body:", req.body);
+  console.log("File:", req.file);
+
+
+  if (!bannerType) {
     return res
       .status(400)
       .json({ message: "Please fill in all required fields." });

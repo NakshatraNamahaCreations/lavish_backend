@@ -23,8 +23,8 @@ export const createOrder = async (req, res) => {
       dueAmount,
       deliveryCharges,
       couponDiscount,
-      gstAmount,
-      paymentType,
+      // gstAmount,
+      // paymentType,
       address,
       customerName,
       customerId,
@@ -40,7 +40,7 @@ export const createOrder = async (req, res) => {
 
     // Validate required fields
     if (!orderId || !eventDate || !eventTime || !pincode || !subTotal ||
-      !grandTotal || !paidAmount || !gstAmount ||
+      !grandTotal || !paidAmount || 
       !address || !items || items.length === 0) {
       return res.status(400).json({
         message: 'Missing required fields',
@@ -53,7 +53,6 @@ export const createOrder = async (req, res) => {
           grandTotal: !grandTotal,
           paidAmount: !paidAmount,
           deliveryCharges: !deliveryCharges,
-          gstAmount: !gstAmount,
           address: !address,
           items: !items || items.length === 0
         }
@@ -83,7 +82,7 @@ export const createOrder = async (req, res) => {
       dueAmount: dueAmount || 0,
       deliveryCharges,
       couponDiscount: couponDiscount || 0,
-      gstAmount,
+      // gstAmount,
       addNote,
       // paymentType: paymentType || 'full',
       address,

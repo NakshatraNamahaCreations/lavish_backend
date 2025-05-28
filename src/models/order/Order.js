@@ -43,7 +43,7 @@ const orderSchema = new mongoose.Schema({
   dueAmount: { type: Number },
   deliveryCharges: { type: Number },
   couponDiscount: { type: Number },
-  gstAmount: { type: Number, required: true },
+  // gstAmount: { type: Number, required: true },
   addNote: { type: String },
   orderStatus: {
     type: String,
