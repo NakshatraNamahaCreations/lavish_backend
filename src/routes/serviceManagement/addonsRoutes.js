@@ -15,14 +15,12 @@ const router = express.Router();
 router.post(
   "/create",
   adminauthenticateToken,
-  upload.single("image"),
   createAddon
 );
 
 router.put(
   "/update/:addonId",
   adminauthenticateToken,
-  upload.single("image"),
   updateAddon
 );
 

@@ -1,25 +1,20 @@
 import Review from '../models/Review.js';
 
 export const createReview = async (req, res) => {
-
-    console.log('req.body:', req.body);
-    console.log('req.files:', req.files);
     try {
         const { customerId, serviceId, rating, reviewText } = req.body;
+        const images = req.body.images ? JSON.parse(req.body.images) : [];
 
         if (!customerId || !serviceId || !rating || !reviewText) {
             return res.status(400).json({ message: 'Fill all the fields.' });
         }
-
-        // Extract uploaded files info from req.files
-        const images = req.files ? req.files.map(file => file.filename) : [];
 
         const newReview = new Review({
             customerId,
             serviceId,
             rating,
             reviewText,
-            images,          // save array of image paths in DB
+            images, // Save array of image URLs
             createdAt: new Date(),
         });
 
@@ -34,7 +29,6 @@ export const createReview = async (req, res) => {
         res.status(500).json({ message: 'Server error while creating review' });
     }
 };
-
 
 // Get all reviews for a service
 export const getReviews = async (req, res) => {

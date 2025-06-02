@@ -11,6 +11,7 @@ export const createAddon = async (req, res) => {
       samedaydelivery,
       addonsDescription,
       customizedInputs,
+      image
     } = req.body;
 
     // Validate required fields
@@ -20,7 +21,7 @@ export const createAddon = async (req, res) => {
       !price ||
       !samedaydelivery ||
       !addonsDescription ||
-      !req.file
+      !image
     ) {
       return res.status(400).json({
         success: false,
@@ -72,7 +73,7 @@ export const createAddon = async (req, res) => {
     // Create the new addon object
     const addon = {
       addonsName,
-      image: req.file.filename,
+      image,
       price,
       samedaydelivery,
       addonsDescription,
@@ -121,6 +122,7 @@ export const updateAddon = async (req, res) => {
       samedaydelivery,
       addonsDescription,
       customizedInputs,
+      image
     } = req.body;
 
     if (
@@ -129,7 +131,8 @@ export const updateAddon = async (req, res) => {
       !addonsName ||
       !price ||
       !samedaydelivery ||
-      !addonsDescription
+      !addonsDescription ||
+      !image
     ) {
       return res.status(400).json({ message: "All fields are required." });
     }
@@ -185,10 +188,8 @@ export const updateAddon = async (req, res) => {
     addon.samedaydelivery = samedaydelivery;
     addon.addonsDescription = addonsDescription;
     addon.customizedInputs = parsedCustomizedInputs;
+    addon.image = image;
 
-    if (req.file) {
-      addon.image = req.file.filename;
-    }
 
     if (addonsDocument.subCategory.toString() !== subCategory) {
       addonsDocument.subCategory = subCategory;
@@ -245,41 +246,6 @@ export const deleteAddon = async (req, res) => {
       .json({ message: "Internal server error.", error: error.message });
   }
 };
-
-
-// export const getAllAddons = async (req, res) => {
-//   try {
-//     const addonsDocs = await Addons.find()
-//       .populate("subCategory", "_id subCategory")
-//       .sort({ createdAt: -1 }); // Optional: Sort subcategories by creation time
-
-//     // Sort each addon's nested array by its own createdAt
-//     const sortedDocs = addonsDocs.map((doc) => {
-//       const sortedAddons = [...doc.addons].sort(
-//         (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-//       );
-//       return {
-//         ...doc.toObject(),
-//         addons: sortedAddons,
-//       };
-//     });
-
-//     if (!sortedDocs || sortedDocs.length === 0) {
-//       return res.status(404).json({ message: "No addons found." });
-//     }
-
-//     res.status(200).json({
-//       message: "Addons fetched successfully.",
-//       data: sortedDocs,
-//     });
-//   } catch (error) {
-//     console.error("Error fetching addons:", error);
-//     res.status(500).json({
-//       message: "Internal server error.",
-//       error: error.message,
-//     });
-//   }
-// };
 
 export const getAllAddons = async (req, res) => {
   try {

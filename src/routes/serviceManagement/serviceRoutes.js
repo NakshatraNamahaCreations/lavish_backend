@@ -21,7 +21,6 @@ const router = express.Router();
 router.post(
   "/create",
   adminauthenticateToken,
-  upload.array("images"),
   createService
 );
 
@@ -35,7 +34,6 @@ router.post(
 router.put(
   "/update/:serviceId",
   adminauthenticateToken,
-  upload.array("images"),
   updateService
 );
 router.delete(

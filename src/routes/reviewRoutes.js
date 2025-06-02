@@ -9,7 +9,7 @@ import upload from "../middleware/multer/multiUploadMulter.js";
 
 const router = express.Router();
 
-router.post("/create", upload.array("images", 5), createReview);
+router.post("/create", createReview);
 router.get("/", getReviews);
 router.get('/service/:serviceId/', getReviewsAndImagesByServiceId);
 

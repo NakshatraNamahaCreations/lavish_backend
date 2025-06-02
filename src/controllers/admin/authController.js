@@ -17,7 +17,8 @@ const generateAccessToken = (admin) => {
 
 export const register = async (req, res) => {
   try {
-    const { email, mobile, password, name, accessTabs = [] } = req.body;
+    const { email, mobile, password, name, profileImage, accessTabs = [] } = req.body;
+    console.log("req.body", req.body)
 
     // Validate mobile number
     if (!mobile || isNaN(mobile) || mobile.length !== 10) {
@@ -39,8 +40,6 @@ export const register = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Handle profile image upload (if provided)
-    let profileImagePath = req.file ? req.file.filename : ""; // Default to empty string if no file uploaded
 
     // Ensure accessTabs is always an array
     let parsedAccessTabs = Array.isArray(accessTabs) ? accessTabs : JSON.parse(accessTabs || '[]');
@@ -52,7 +51,7 @@ export const register = async (req, res) => {
       email,
       password: hashedPassword,
       isActive: true,
-      profileImage: profileImagePath,
+      profileImage,
       accessTabs: parsedAccessTabs,
     });
 
@@ -70,7 +69,7 @@ export const register = async (req, res) => {
         name: admin.name,
         email: admin.email,
         mobile: admin.mobile,
-        profileImage: admin.profileImage, // Image filename
+        profileImage: admin.profileImage, 
         accessTabs: admin.accessTabs
       }
     });
@@ -160,7 +159,7 @@ export const getAllteamsMember = async (req, res) => {
 export const updateAdmin = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, email, mobile, accessTabs } = req.body;
+    const { name, email, mobile, accessTabs, profileImage } = req.body;
 
     // Validate mobile number if provided
     if (mobile && (isNaN(mobile) || mobile.length !== 10)) {
@@ -188,7 +187,7 @@ export const updateAdmin = async (req, res) => {
       ...(email && { email }),
       ...(mobile && { mobile }),
       ...(accessTabs && { accessTabs: Array.isArray(accessTabs) ? accessTabs : JSON.parse(accessTabs) }),
-      ...(req.file && { profileImage: req.file.filename })
+      ...(profileImage && { profileImage })
     };
 
     const updatedAdmin = await Admin.findByIdAndUpdate(

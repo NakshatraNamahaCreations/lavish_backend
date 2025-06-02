@@ -4,7 +4,7 @@ import { adminauthenticateToken } from '../../middleware/admin/authMiddleware.js
 import upload from "../../middleware/multer/multer.js"
 const router = express.Router();
 
-router.post("/register", upload.single("profileImage"), register);
+router.post("/register", register);
 router.post('/login', login);
 router.post('/logout', adminauthenticateToken, logout);
 router.get('/teamMembers', getAllteamsMember);

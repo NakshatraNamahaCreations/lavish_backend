@@ -3,6 +3,7 @@ import Subcategory from "../../models/category/Subcategory.js";
 import SubSubCategory from "../../models/category/Subsubcategory.js";
 
 export const createService = async (req, res) => {
+  console.log("req.body", req.body);
   try {
     const {
       serviceName,
@@ -16,6 +17,7 @@ export const createService = async (req, res) => {
       balloonColors,
       originalPrice,
       offerPrice,
+      images,
     } = req.body;
 
     if (
@@ -26,7 +28,7 @@ export const createService = async (req, res) => {
       !originalPrice ||
       !offerPrice ||
       !balloonColors ||
-      !req.files
+      !images
     ) {
       return res.status(400).json({
         success: false,
@@ -62,8 +64,9 @@ export const createService = async (req, res) => {
     }
 
     const parsedBalloonColors = JSON.parse(balloonColors);
+    const parsedImages = JSON.parse(images);
 
-    const imagePaths = req.files.map((file) => file.filename);
+    // const imagePaths = req.files.map((file) => file.filename);
 
     const newService = new Service({
       serviceName,
@@ -77,7 +80,7 @@ export const createService = async (req, res) => {
       balloonColors: parsedBalloonColors,
       originalPrice: Number(originalPrice),
       offerPrice: Number(offerPrice),
-      images: imagePaths,
+      images: parsedImages,
     });
 
     await newService.save();
@@ -101,6 +104,7 @@ export const createService = async (req, res) => {
 export const updateService = async (req, res) => {
   try {
     const { serviceId } = req.params;
+
     const {
       serviceName,
       categoryId,
@@ -113,6 +117,7 @@ export const updateService = async (req, res) => {
       balloonColors,
       originalPrice,
       offerPrice,
+      images
     } = req.body;
 
     const service = await Service.findById(serviceId);
@@ -123,59 +128,86 @@ export const updateService = async (req, res) => {
       });
     }
 
-    let parsedCustomizedInputs = service.customizedInputs;
-    try {
-      parsedCustomizedInputs = customizedInputs ? JSON.parse(customizedInputs) : service.customizedInputs;
+    // Safe parse: customizedInputs
+    let parsedCustomizedInputs = [];
+    if (customizedInputs) {
+      try {
+        parsedCustomizedInputs = typeof customizedInputs === "string"
+          ? JSON.parse(customizedInputs)
+          : customizedInputs;
 
-      if (!Array.isArray(parsedCustomizedInputs)) {
-        return res.status(400).json({
-          success: false,
-          message: "customizedInputs must be an array of objects.",
-        });
-      }
-
-      for (const input of parsedCustomizedInputs) {
-        if (!input.label || !input.inputType) {
+        if (!Array.isArray(parsedCustomizedInputs)) {
           return res.status(400).json({
             success: false,
-            message: "Each customized input must include label and inputType.",
+            message: "customizedInputs must be an array of objects.",
           });
         }
+
+        for (const input of parsedCustomizedInputs) {
+          if (!input.label || !input.inputType) {
+            return res.status(400).json({
+              success: false,
+              message: "Each customized input must include label and inputType.",
+            });
+          }
+        }
+      } catch (error) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid customizedInputs format.",
+        });
       }
-    } catch (error) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid format for customizedInputs",
-      });
+    } else {
+      parsedCustomizedInputs = service.customizedInputs;
     }
 
-    let parsedBalloonColors = service.balloonColors;
-    try {
-      parsedBalloonColors = balloonColors ? JSON.parse(balloonColors) : service.balloonColors;
-    } catch (error) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid format for balloonColors",
-      });
+    // Safe parse: balloonColors
+    let parsedBalloonColors = [];
+    if (balloonColors) {
+      try {
+        parsedBalloonColors = typeof balloonColors === "string"
+          ? JSON.parse(balloonColors)
+          : balloonColors;
+      } catch (error) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid balloonColors format.",
+        });
+      }
+    } else {
+      parsedBalloonColors = service.balloonColors;
     }
 
-    if (serviceName) service.serviceName = serviceName;
-    if (categoryId) service.categoryId = categoryId;
-    if (subCategoryId) service.subCategoryId = subCategoryId;
+    // Safe parse: images
+    let parsedImages = [];
+    if (images) {
+      try {
+        parsedImages = typeof images === "string"
+          ? JSON.parse(images)
+          : images;
+      } catch (error) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid images format.",
+        });
+      }
+    } else {
+      parsedImages = service.images;
+    }
+
+    // Update all fields
+    service.serviceName = serviceName || service.serviceName;
+    service.categoryId = categoryId || service.categoryId;
+    service.subCategoryId = subCategoryId || service.subCategoryId;
     service.subSubCategoryId = subSubCategoryId || null;
     service.themeId = themeId || null;
-    if (packageDetails) service.packageDetails = packageDetails;
-    if (requiredDetails !== undefined) service.requiredDetails = requiredDetails;
-
+    service.packageDetails = packageDetails || service.packageDetails;
+    service.requiredDetails = requiredDetails || service.requiredDetails;
     service.customizedInputs = parsedCustomizedInputs;
     service.balloonColors = parsedBalloonColors;
-
-    if (originalPrice) service.originalPrice = originalPrice;
-    if (offerPrice) service.offerPrice = offerPrice;
-
-    if (req.files && req.files.length > 0) {
-      service.images = req.files.map((file) => file.filename);
-    }
+    service.originalPrice = originalPrice || service.originalPrice;
+    service.offerPrice = offerPrice || service.offerPrice;
+    service.images = parsedImages;
 
     await service.save();
 
@@ -193,6 +225,8 @@ export const updateService = async (req, res) => {
     });
   }
 };
+
+
 
 
 export const getAllService = async (req, res) => {

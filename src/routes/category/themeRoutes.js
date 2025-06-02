@@ -5,8 +5,8 @@ import upload from "../../middleware/multer/multer.js"
 
 const router = express.Router()
 
-router.post("/create", adminauthenticateToken,  upload.single("image"), addTheme)
-router.put("/update/:id", adminauthenticateToken,  upload.single("image"), updateTheme)
+router.post("/create", adminauthenticateToken,   addTheme)
+router.put("/update/:id", adminauthenticateToken, updateTheme)
 router.delete("/delete/:id", deleteTheme)
 
 router.get("/", getAllThemes)

@@ -33,7 +33,13 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
+// app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
+
+app.use(cors({ 
+    credentials: true, 
+    origin: ["http://localhost:5173", "http://localhost:5174"]
+}));
+
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
