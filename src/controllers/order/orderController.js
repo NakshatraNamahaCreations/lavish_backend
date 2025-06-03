@@ -117,44 +117,80 @@ export const createOrder = async (req, res) => {
   }
 };
 
-export const getUserUpcomingOrders = async (req, res) => {
-  try {
-    const { userId } = req.params;
+// export const getUserUpcomingOrders = async (req, res) => {
+//   try {
+//     const { userId } = req.params;
 
-    const currentDate = moment().format("MMMM DD, YYYY"); // "May 17, 2025"
+//     const currentDate = moment().format("MMMM DD, YYYY"); // "May 17, 2025"
 
-    const upcomingOrders = await Order.find({
-      customerId: userId,
-      eventDate: { $gte: currentDate } // assuming stored as "May 18, 2025" etc.
-    }).sort({ eventDate: 1 });
+//     const upcomingOrders = await Order.find({
+//       customerId: userId,
+//       eventDate: { $gte: currentDate } // assuming stored as "May 18, 2025" etc.
+//     }).sort({ eventDate: 1 });
 
-    res.status(200).json({
-      success: true,
-      data: upcomingOrders,
-      length: upcomingOrders.length,
-    });
-  } catch (error) {
-    console.error('Error fetching upcoming orders:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching upcoming orders',
-      error: error.message,
-    });
-  }
-};
+//     res.status(200).json({
+//       success: true,
+//       data: upcomingOrders,
+//       length: upcomingOrders.length,
+//     });
+//   } catch (error) {
+//     console.error('Error fetching upcoming orders:', error);
+//     res.status(500).json({
+//       success: false,
+//       message: 'Error fetching upcoming orders',
+//       error: error.message,
+//     });
+//   }
+// };
 
+// export const getUserPastOrders = async (req, res) => {
+//   try {
+//     const { userId } = req.params;
 
+//     const currentDate = moment().format("MMMM DD, YYYY"); // "May 17, 2025"
+
+//     const pastOrders = await Order.find({
+//       customerId: userId,
+//       eventDate: { $lt: currentDate } // assuming stored as "May 16, 2025" etc.
+//     }).sort({ eventDate: -1 });
+
+//     res.status(200).json({
+//       success: true,
+//       data: pastOrders,
+//       length: pastOrders.length,
+//     });
+//   } catch (error) {
+//     console.error('Error fetching past orders:', error);
+//     res.status(500).json({
+//       success: false,
+//       message: 'Error fetching past orders',
+//       error: error.message,
+//     });
+//   }
+// };
 
 export const getUserPastOrders = async (req, res) => {
   try {
     const { userId } = req.params;
+    const now = moment();
 
-    const currentDate = moment().format("MMMM DD, YYYY"); // "May 17, 2025"
+    // Get all orders and filter manually based on combined datetime
+    const allOrders = await Order.find({ customerId: userId });
 
-    const pastOrders = await Order.find({
-      customerId: userId,
-      eventDate: { $lt: currentDate } // assuming stored as "May 16, 2025" etc.
-    }).sort({ eventDate: -1 });
+    const pastOrders = allOrders.filter(order => {
+      if (!order.eventDate || !order.eventTime) return false;
+
+      // Combine eventDate and END time from eventTime range
+      const [_, endTime] = order.eventTime.split(" - ");
+      const combinedDateTime = moment(`${order.eventDate} ${endTime}`, "MMM DD, YYYY hh:mm A");
+
+      return combinedDateTime.isBefore(now);
+    });
+
+    // Sort by eventDate descending
+    pastOrders.sort((a, b) =>
+      moment(b.eventDate, "MMM DD, YYYY").toDate() - moment(a.eventDate, "MMM DD, YYYY").toDate()
+    );
 
     res.status(200).json({
       success: true,
@@ -162,10 +198,48 @@ export const getUserPastOrders = async (req, res) => {
       length: pastOrders.length,
     });
   } catch (error) {
-    console.error('Error fetching past orders:', error);
+    console.error("Error fetching past orders:", error);
     res.status(500).json({
       success: false,
-      message: 'Error fetching past orders',
+      message: "Error fetching past orders",
+      error: error.message,
+    });
+  }
+};
+
+export const getUserUpcomingOrders = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const now = moment();
+
+    // Get all orders and filter manually based on combined datetime
+    const allOrders = await Order.find({ customerId: userId });
+
+    const upcomingOrders = allOrders.filter(order => {
+      if (!order.eventDate || !order.eventTime) return false;
+
+      // Combine eventDate and END time from eventTime range
+      const [_, endTime] = order.eventTime.split(" - ");
+      const combinedDateTime = moment(`${order.eventDate} ${endTime}`, "MMM DD, YYYY hh:mm A");
+
+      return combinedDateTime.isSameOrAfter(now);
+    });
+
+    // Sort by eventDate ascending
+    upcomingOrders.sort((a, b) =>
+      moment(a.eventDate, "MMM DD, YYYY").toDate() - moment(b.eventDate, "MMM DD, YYYY").toDate()
+    );
+
+    res.status(200).json({
+      success: true,
+      data: upcomingOrders,
+      length: upcomingOrders.length,
+    });
+  } catch (error) {
+    console.error("Error fetching upcoming orders:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching upcoming orders",
       error: error.message,
     });
   }
