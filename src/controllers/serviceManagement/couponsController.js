@@ -8,7 +8,7 @@ export const createCoupon = async (req, res) => {
       couponCode,
       couponDetails,
       startDate,
-      endDate, // Optional
+      // endDate, // Optional
     } = req.body;
 
     // Basic validation
@@ -31,7 +31,7 @@ export const createCoupon = async (req, res) => {
       couponCode,
       couponDetails,
       startDate: new Date(startDate),
-      ...(endDate && { endDate: new Date(endDate) }), 
+      // ...(endDate && { endDate: new Date(endDate) }), 
     });
 
     await newCoupon.save();
@@ -60,15 +60,15 @@ export const updateCoupon = async (req, res) => {
     }
 
     // Validate and convert endDate if provided
-    if (updateData.endDate) {
-      const parsedEndDate = new Date(updateData.endDate);
-      if (isNaN(parsedEndDate.getTime())) {
-        return res.status(400).json({ message: "Invalid end date." });
-      }
-      updateData.endDate = parsedEndDate;
-    } else {
-      delete updateData.endDate; // Ensure it's not passed as undefined
-    }
+    // if (updateData.endDate) {
+    //   const parsedEndDate = new Date(updateData.endDate);
+    //   if (isNaN(parsedEndDate.getTime())) {
+    //     return res.status(400).json({ message: "Invalid end date." });
+    //   }
+    //   updateData.endDate = parsedEndDate;
+    // } else {
+    //   delete updateData.endDate; // Ensure it's not passed as undefined
+    // }
 
     const updatedCoupon = await Coupon.findByIdAndUpdate(id, updateData, {
       new: true,

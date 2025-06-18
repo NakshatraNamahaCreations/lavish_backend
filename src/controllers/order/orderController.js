@@ -35,12 +35,11 @@ export const createOrder = async (req, res) => {
       otherOccasion,
       otherDecorLocation,
       source,
-      altMobile
     } = req.body;
 
     // Validate required fields
     if (!orderId || !eventDate || !eventTime || !pincode || !subTotal ||
-      !grandTotal || !paidAmount || 
+      !grandTotal || !paidAmount ||
       !address || !items || items.length === 0) {
       return res.status(400).json({
         message: 'Missing required fields',
@@ -95,7 +94,6 @@ export const createOrder = async (req, res) => {
       otherOccasion,
       otherDecorLocation,
       source,
-      altMobile
     });
 
     console.log('Final order object:', order);
@@ -117,57 +115,6 @@ export const createOrder = async (req, res) => {
   }
 };
 
-// export const getUserUpcomingOrders = async (req, res) => {
-//   try {
-//     const { userId } = req.params;
-
-//     const currentDate = moment().format("MMMM DD, YYYY"); // "May 17, 2025"
-
-//     const upcomingOrders = await Order.find({
-//       customerId: userId,
-//       eventDate: { $gte: currentDate } // assuming stored as "May 18, 2025" etc.
-//     }).sort({ eventDate: 1 });
-
-//     res.status(200).json({
-//       success: true,
-//       data: upcomingOrders,
-//       length: upcomingOrders.length,
-//     });
-//   } catch (error) {
-//     console.error('Error fetching upcoming orders:', error);
-//     res.status(500).json({
-//       success: false,
-//       message: 'Error fetching upcoming orders',
-//       error: error.message,
-//     });
-//   }
-// };
-
-// export const getUserPastOrders = async (req, res) => {
-//   try {
-//     const { userId } = req.params;
-
-//     const currentDate = moment().format("MMMM DD, YYYY"); // "May 17, 2025"
-
-//     const pastOrders = await Order.find({
-//       customerId: userId,
-//       eventDate: { $lt: currentDate } // assuming stored as "May 16, 2025" etc.
-//     }).sort({ eventDate: -1 });
-
-//     res.status(200).json({
-//       success: true,
-//       data: pastOrders,
-//       length: pastOrders.length,
-//     });
-//   } catch (error) {
-//     console.error('Error fetching past orders:', error);
-//     res.status(500).json({
-//       success: false,
-//       message: 'Error fetching past orders',
-//       error: error.message,
-//     });
-//   }
-// };
 
 export const getUserPastOrders = async (req, res) => {
   try {
@@ -207,28 +154,68 @@ export const getUserPastOrders = async (req, res) => {
   }
 };
 
+// export const getUserUpcomingOrders = async (req, res) => {
+//   try {
+//     const { userId } = req.params;
+//     const now = moment();
+
+//     // Get all orders and filter manually based on combined datetime
+//     const allOrders = await Order.find({ customerId: userId });
+
+//     const upcomingOrders = allOrders.filter(order => {
+//       if (!order.eventDate || !order.eventTime) return false;
+
+//       // Combine eventDate and END time from eventTime range
+//       const [_, endTime] = order.eventTime.split(" - ");
+//       const combinedDateTime = moment(`${order.eventDate} ${endTime}`, "MMM DD, YYYY hh:mm A");
+
+//       return combinedDateTime.isSameOrAfter(now);
+//     });
+
+//     // Sort by eventDate ascending
+//     upcomingOrders.sort((a, b) =>
+//       moment(a.eventDate, "MMM DD, YYYY").toDate() - moment(b.eventDate, "MMM DD, YYYY").toDate()
+//     );
+
+//     res.status(200).json({
+//       success: true,
+//       data: upcomingOrders,
+//       length: upcomingOrders.length,
+//     });
+//   } catch (error) {
+//     console.error("Error fetching upcoming orders:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Error fetching upcoming orders",
+//       error: error.message,
+//     });
+//   }
+// };
+
+
 export const getUserUpcomingOrders = async (req, res) => {
   try {
     const { userId } = req.params;
     const now = moment();
 
-    // Get all orders and filter manually based on combined datetime
+    // Fetch all orders for the user
     const allOrders = await Order.find({ customerId: userId });
 
+    // Filter only upcoming orders based on combined eventDate + endTime
     const upcomingOrders = allOrders.filter(order => {
       if (!order.eventDate || !order.eventTime) return false;
 
-      // Combine eventDate and END time from eventTime range
       const [_, endTime] = order.eventTime.split(" - ");
-      const combinedDateTime = moment(`${order.eventDate} ${endTime}`, "MMM DD, YYYY hh:mm A");
+      const combinedDateTime = moment(
+        `${order.eventDate} ${endTime}`,
+        "MMM DD, YYYY hh:mm A"
+      );
 
       return combinedDateTime.isSameOrAfter(now);
     });
 
-    // Sort by eventDate ascending
-    upcomingOrders.sort((a, b) =>
-      moment(a.eventDate, "MMM DD, YYYY").toDate() - moment(b.eventDate, "MMM DD, YYYY").toDate()
-    );
+    // ✅ Sort by createdAt DESC (most recently booked first)
+    upcomingOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     res.status(200).json({
       success: true,
@@ -244,6 +231,7 @@ export const getUserUpcomingOrders = async (req, res) => {
     });
   }
 };
+
 
 export const getUserOrders = async (req, res) => {
   try {
@@ -369,9 +357,10 @@ export const getOrderDetailsbyId = async (req, res) => {
       return res.status(400).json({ message: 'Order ID is required' });
     }
 
-    // Find order by ID and populate related fields if needed
+    // Find order by ID and populate customer details with only alternateMobile and email
     const order = await Order.findOne({ _id: id })
-   
+      .populate('customerId', 'mobile alternateMobile email')
+
 
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
@@ -385,10 +374,10 @@ export const getOrderDetailsbyId = async (req, res) => {
 
   } catch (error) {
     console.error('Error fetching order details:', error);
-    return res.status(500).json({ 
+    return res.status(500).json({
       success: false,
-      message: 'Error fetching order details', 
-      error: error.message 
+      message: 'Error fetching order details',
+      error: error.message
     });
   }
 };
@@ -547,7 +536,7 @@ export const updateOrderStatus = async (req, res) => {
 
     // Update order status
     order.orderStatus = status;
-    
+
     // If status is cancelled, add reason
     if (status === "cancelled" && reason) {
       order.reason = reason;

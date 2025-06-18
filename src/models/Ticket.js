@@ -5,7 +5,7 @@ const TicketSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: String,
   mobileNumber: Number,
-
+  status: { type: String, default: "not raised" },
 
 }, { timestamps: true });
 
@@ -14,4 +14,4 @@ const Ticket = mongoose.model("Ticket", TicketSchema);
 
 export default Ticket;
 
-  // images: [String], 
+// images: [String], 

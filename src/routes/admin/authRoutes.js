@@ -1,7 +1,7 @@
 import express from 'express';
 import { register, login, logout, getAllteamsMember, updateAdmin, deleteAdmin, getAdminById } from '../../controllers/admin/authController.js';
-import { adminauthenticateToken } from '../../middleware/admin/authMiddleware.js';  // If needed for protected routes
-import upload from "../../middleware/multer/multer.js"
+import { adminauthenticateToken } from '../../middleware/admin/authMiddleware.js';  
+
 const router = express.Router();
 
 router.post("/register", register);

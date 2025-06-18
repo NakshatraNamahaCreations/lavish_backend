@@ -48,12 +48,6 @@ const UserSchema = new mongoose.Schema({
   pincode: { 
     type: String,
     trim: true,
-    validate: {
-      validator: function(v) {
-        return v === '' || /^\d{6}$/.test(v);
-      },
-      message: props => `${props.value} is not a valid 6-digit pincode!`
-    }
   },
   // country: { type: String },
   // profileImage: { type: String, },

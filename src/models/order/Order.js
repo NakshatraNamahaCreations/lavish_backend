@@ -56,7 +56,6 @@ const orderSchema = new mongoose.Schema({
   customerName: { type: String, required: true },
   customerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   items: [itemSchema],
-  altMobile: { type: String },
   occasion: { type: String },
   otherOccasion: { type: String },
   otherDecorLocation: { type: String },

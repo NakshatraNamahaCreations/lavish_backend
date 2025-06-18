@@ -3,7 +3,7 @@ import User from '../../models/User.js';
 // Get all users
 export const getAllUsers = async (req, res) => {
     try {
-        const users = await User.find();
+        const users = await User.find().sort({createdAt:-1});
         return res.status(200).json({
             success: true,
             totalcount: users.length,
@@ -58,6 +58,7 @@ export const getUsersWithPagination = async (req, res) => {
 
         // Find users with pagination and search
         const users = await User.find(searchQuery)
+            .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
 

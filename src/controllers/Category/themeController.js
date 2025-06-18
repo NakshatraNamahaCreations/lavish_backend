@@ -419,6 +419,106 @@ export const addTheme = async (req, res) => {
 };
 
 
+// export const getAllThemes = async (req, res) => {
+//   try {
+//     const page = parseInt(req.query.page) || 1;
+//     const limit = parseInt(req.query.limit) || 10;
+//     const search = req.query.search || "";
+
+//     const skip = (page - 1) * limit;
+
+//     // Build search filters
+//     let themeQuery = {};
+
+//     if (search) {
+//       // Search by theme name
+//       const themeNameQuery = { theme: { $regex: search, $options: "i" } };
+    
+//       // Match sub-sub-category names
+//       const matchingSubSubCats = await SubSubCategory.find({
+//         subSubCategory: { $regex: search, $options: "i" },
+//       });
+    
+//       // Match sub-category names
+//       const matchingSubCats = await SubCategory.find({
+//         subCategory: { $regex: search, $options: "i" },
+//       });
+    
+//       // Match categories
+//       const matchingCats = await Category.find({
+//         category: { $regex: search, $options: "i" },
+//       });
+    
+//       // From matching categories, find all subCategories
+//       const subCatsFromCats = await SubCategory.find({
+//         category: { $in: matchingCats.map((cat) => cat._id) },
+//       });
+    
+//       // Find matching subSubCategory IDs from both subCategory matches and direct name match
+//       const subSubCatsFromSubCats = await SubSubCategory.find({
+//         subCategory: {
+//           $in: [...matchingSubCats, ...subCatsFromCats].map((s) => s._id),
+//         },
+//       });
+    
+//       const allSubSubCatIds = [
+//         ...matchingSubSubCats,
+//         ...subSubCatsFromSubCats,
+//       ].map((s) => s._id.toString());
+    
+//       const categoryMatchQuery = {
+//         subSubCategory: { $in: allSubSubCatIds },
+//       };
+    
+//       // Combine both theme name and category-based matches
+//       themeQuery = {
+//         $or: [themeNameQuery, categoryMatchQuery],
+//       };
+//     }
+    
+
+//     const total = await Theme.countDocuments(themeQuery);
+
+//     const themes = await Theme.find(themeQuery)
+//       .populate({
+//         path: "subSubCategory",
+//         select: "subSubCategory subCategory",
+//         populate: {
+//           path: "subCategory",
+//           select: "subCategory category",
+//           populate: {
+//             path: "category",
+//             select: "category",
+//           },
+//         },
+//       })
+//       .select("-__v")
+//       .sort({ createdAt: -1 })
+//       .skip(skip)
+//       .limit(limit);
+
+//     return res.status(200).json({
+//       success: true,
+//       count: themes.length,
+//       data: themes,
+//       pagination: {
+//         totalItems: total,
+//         totalPages: Math.ceil(total / limit),
+//         currentPage: page,
+//         limit,
+//       },
+//     });
+//   } catch (error) {
+//     console.error("Error fetching themes:", error);
+//     return res.status(500).json({
+//       success: false,
+//       message: "Failed to fetch themes",
+//       error: error.message,
+//     });
+//   }
+// };
+
+
 export const getAllThemes = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -433,69 +533,62 @@ export const getAllThemes = async (req, res) => {
     if (search) {
       // Search by theme name
       const themeNameQuery = { theme: { $regex: search, $options: "i" } };
-    
-      // Match sub-sub-category names
-      const matchingSubSubCats = await SubSubCategory.find({
-        subSubCategory: { $regex: search, $options: "i" },
-      });
-    
-      // Match sub-category names
-      const matchingSubCats = await SubCategory.find({
-        subCategory: { $regex: search, $options: "i" },
-      });
-    
-      // Match categories
-      const matchingCats = await Category.find({
-        category: { $regex: search, $options: "i" },
-      });
-    
-      // From matching categories, find all subCategories
+
+      // Promise.all to run all search queries concurrently
+      const [matchingSubSubCats, matchingSubCats, matchingCats] = await Promise.all([
+        SubSubCategory.find({ subSubCategory: { $regex: search, $options: "i" } }),
+        SubCategory.find({ subCategory: { $regex: search, $options: "i" } }),
+        Category.find({ category: { $regex: search, $options: "i" } })
+      ]);
+
+      // From matching categories, find all subCategories concurrently
       const subCatsFromCats = await SubCategory.find({
         category: { $in: matchingCats.map((cat) => cat._id) },
       });
-    
+
       // Find matching subSubCategory IDs from both subCategory matches and direct name match
       const subSubCatsFromSubCats = await SubSubCategory.find({
         subCategory: {
           $in: [...matchingSubCats, ...subCatsFromCats].map((s) => s._id),
         },
       });
-    
+
       const allSubSubCatIds = [
         ...matchingSubSubCats,
         ...subSubCatsFromSubCats,
       ].map((s) => s._id.toString());
-    
+
       const categoryMatchQuery = {
         subSubCategory: { $in: allSubSubCatIds },
       };
-    
+
       // Combine both theme name and category-based matches
       themeQuery = {
         $or: [themeNameQuery, categoryMatchQuery],
       };
     }
-    
 
-    const total = await Theme.countDocuments(themeQuery);
-
-    const themes = await Theme.find(themeQuery)
-      .populate({
-        path: "subSubCategory",
-        select: "subSubCategory subCategory",
-        populate: {
-          path: "subCategory",
-          select: "subCategory category",
+    // Separate countDocuments and find queries into two promises
+    const [total, themes] = await Promise.all([
+      Theme.countDocuments(themeQuery),
+      Theme.find(themeQuery)
+        .populate({
+          path: "subSubCategory",
+          select: "subSubCategory subCategory",
           populate: {
-            path: "category",
-            select: "category",
+            path: "subCategory",
+            select: "subCategory category",
+            populate: {
+              path: "category",
+              select: "category",
+            },
           },
-        },
-      })
-      .select("-__v")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+        })
+        .select("-__v")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+    ]);
 
     return res.status(200).json({
       success: true,
@@ -517,6 +610,7 @@ export const getAllThemes = async (req, res) => {
     });
   }
 };
+
 
 
 export const getThemebySubSubcategoryId = async (req, res) => {

@@ -36,6 +36,8 @@ export const createWishlist = async (req, res) => {
 
 export const removeItemFromWishlist = async (req, res) => {
   const { customerId, serviceId } = req.params;
+  console.log("customerId", customerId)
+  console.log("ServcieId", serviceId)
 
   try {
     // Find the wishlist and remove the item
