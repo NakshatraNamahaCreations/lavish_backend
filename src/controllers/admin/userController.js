@@ -41,6 +41,7 @@ export const getUserCount = async (req, res) => {
 
 // Route to get users with pagination
 export const getUsersWithPagination = async (req, res) => {
+    console.log("hiii")
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 5;
@@ -58,10 +59,11 @@ export const getUsersWithPagination = async (req, res) => {
 
         // Find users with pagination and search
         const users = await User.find(searchQuery)
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit);
-
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        
+        console.log("users:", users)
         // Get the total count of filtered users
         const totalUsers = await User.countDocuments(searchQuery);
 
